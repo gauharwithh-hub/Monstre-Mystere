@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Le Monstre Mystère</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff6e6; --ink:#2d2a32; --card:#ffffff;
+  --red:#ff6b6b; --teal:#3ecfc3; --purple:#8a6cff; --yellow:#ffd23f; --pink:#ff8fc7; --green:#6fd36b;
+  --le:#2f86f0; --la:#ff4f6d; --les:#8a5cff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:'Baloo 2',system-ui,sans-serif;color:var(--ink);background:var(--bg);
+  background-image:
+    radial-gradient(circle at 8% 18%,#ffe0ec 0 70px,transparent 71px),
+    radial-gradient(circle at 92% 85%,#dcf7f4 0 110px,transparent 111px),
+    radial-gradient(circle at 85% 8%,#fff0b3 0 60px,transparent 61px),
+    radial-gradient(circle at 15% 92%,#ece4ff 0 80px,transparent 81px);
+  background-attachment:fixed;
+  -webkit-tap-highlight-color:transparent;
+}
+.hidden{display:none!important}
+button{font-family:inherit;color:var(--ink);cursor:pointer}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:10px;padding:10px 16px}
+.topbar h1{margin:0;font-size:clamp(22px,3.2vw,44px);font-weight:800;flex:1;letter-spacing:.5px;line-height:1.1}
+.topbar h1 span{color:var(--purple)}
+.icon-btn{flex:none;width:52px;height:52px;border-radius:16px;border:4px solid var(--ink);background:#fff;font-size:24px;
+  box-shadow:0 5px 0 var(--ink);display:grid;place-items:center;transition:transform .08s}
+.icon-btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+.icon-btn.off{opacity:.45}
+
+.btn{font-size:clamp(19px,2.2vw,30px);font-weight:800;padding:10px 24px;border-radius:999px;border:4px solid var(--ink);
+  background:var(--yellow);box-shadow:0 6px 0 var(--ink);transition:transform .08s}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+.btn.teal{background:var(--teal)} .btn.pink{background:var(--pink)} .btn.purple{background:var(--purple);color:#fff}
+.btn.white{background:#fff}
+.btn.big{font-size:clamp(22px,2.8vw,38px);padding:14px 32px}
+
+/* Home */
+#home{padding:6px 16px 40px;max-width:1200px;margin:0 auto}
+.hero{text-align:center;margin:0 0 18px}
+.hero .mascot{width:min(200px,42vw);margin:0 auto;animation:bob 2.4s ease-in-out infinite}
+.hero p{font-size:clamp(19px,2.2vw,28px);margin:0;font-weight:600}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.mode{background:#fff;border:5px solid var(--ink);border-radius:30px;padding:20px;box-shadow:0 8px 0 var(--ink);position:relative}
+.mode .step{position:absolute;top:-18px;left:18px;background:var(--ink);color:#fff;border-radius:999px;padding:0 14px;font-weight:800;font-size:18px}
+.mode h2{margin:4px 0 2px;font-size:clamp(26px,3vw,38px)}
+.mode p{margin:0 0 14px;font-size:19px;font-weight:600;opacity:.8}
+.levels{display:flex;flex-wrap:wrap;gap:12px}
+.levels .btn small{display:block;font-size:15px;font-weight:600;line-height:1}
+.tip{margin-top:24px;background:#fff;border:4px dashed var(--ink);border-radius:24px;padding:14px 20px;font-size:18px;font-weight:600}
+.tip b{color:var(--purple)}
+.warn{margin-top:16px;background:#ffe3e3;border:4px solid var(--red);border-radius:20px;padding:12px 18px;font-size:18px;font-weight:600}
+
+/* Game layout */
+.game{display:grid;grid-template-columns:minmax(280px,44%) 1fr;gap:22px;padding:4px 16px 24px;max-width:1500px;margin:0 auto;align-items:start}
+@media (max-width:760px){.game{grid-template-columns:1fr}}
+
+.stage{position:relative;border:6px solid var(--ink);border-radius:30px;overflow:hidden;aspect-ratio:460/520;
+  width:min(100%, calc(76vh * 460 / 520));margin:0 auto;
+  background:linear-gradient(#bfe9ff 0,#e9f8ff 74%,#c9efb9 74%,#b4e3a2 100%);box-shadow:0 8px 0 var(--ink)}
+.stage svg{position:absolute;inset:0;width:100%;height:100%}
+.curtain{position:absolute;top:0;bottom:0;width:51%;z-index:2;transition:transform 1.3s cubic-bezier(.7,0,.25,1);
+  background:repeating-linear-gradient(90deg,#e0384b 0 30px,#b8283a 30px 60px)}
+.curtain::after{content:"";position:absolute;left:0;right:0;top:0;height:36px;background:repeating-linear-gradient(90deg,#ffd23f 0 20px,#f2b300 20px 40px);border-bottom:4px solid var(--ink)}
+.curtain.l{left:0;border-right:4px solid var(--ink)} .curtain.r{right:0;border-left:4px solid var(--ink)}
+.stage.open .curtain.l{transform:translateX(-102%)} .stage.open .curtain.r{transform:translateX(102%)}
+.qmark{position:absolute;inset:0;z-index:3;display:grid;place-items:center;pointer-events:none;transition:opacity .4s}
+.qmark span{font-size:clamp(100px,16vw,230px);font-weight:800;color:#fff;-webkit-text-stroke:6px var(--ink);paint-order:stroke;animation:wobble 2.2s ease-in-out infinite}
+.stage.open .qmark{opacity:0}
+.stage .mwrap{position:absolute;inset:0}
+.stage.open .mwrap{animation:pop .9s .7s both}
+.nameplate{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:4;background:#fff;border:4px solid var(--ink);
+  border-radius:999px;padding:2px 20px;font-size:clamp(20px,2.4vw,32px);font-weight:800;white-space:nowrap;opacity:0;transition:opacity .4s 1.4s}
+.stage.open .nameplate{opacity:1}
+.stage:not(.open) .nameplate{transition:none}
+
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.intro{background:var(--purple);color:#fff;border:5px solid var(--ink);border-radius:24px;padding:10px 20px;font-size:clamp(21px,2.5vw,34px);font-weight:800;box-shadow:0 6px 0 var(--ink)}
+.intro small{display:block;font-size:.6em;font-weight:600;opacity:.9}
+.progress{display:flex;gap:6px;flex-wrap:wrap}
+.progress i{width:20px;height:20px;border-radius:50%;border:3px solid var(--ink);background:#fff}
+.progress i.on{background:var(--yellow)}
+.clues{display:flex;flex-direction:column;gap:10px;max-height:50vh;overflow-y:auto;padding:4px 6px 8px 2px}
+.clue{display:flex;align-items:center;gap:12px;background:#fff;border:4px solid var(--ink);border-radius:22px;padding:6px 10px;
+  font-size:clamp(21px,2.6vw,36px);font-weight:700;animation:slideIn .45s cubic-bezier(.2,1.4,.4,1) both}
+.clue .n{flex:none;width:40px;height:40px;border-radius:50%;background:var(--teal);border:3px solid var(--ink);display:grid;place-items:center;font-size:20px;font-weight:800}
+.clue .e{flex:none;font-size:1.05em}
+.clue .t{flex:1;transition:filter .3s;cursor:pointer}
+.hide-text .clue .t:not(.shown){filter:blur(11px);user-select:none}
+.clue .say{flex:none;width:48px;height:48px;border-radius:14px;border:3px solid var(--ink);background:var(--yellow);font-size:22px}
+.clue:last-child{background:#fffbe0}
+.actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+
+/* Flashcards */
+#cards{padding:0 16px 30px;max-width:900px;margin:0 auto;text-align:center}
+.deck-title{font-size:clamp(24px,3vw,40px);font-weight:800;margin:0 0 4px}
+.legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-weight:800;font-size:18px;margin-bottom:10px}
+.legend span{padding:0 12px;border-radius:999px;border:3px solid var(--ink);background:#fff}
+.fc{perspective:1400px;width:min(92vw, calc(64vh * 460 / 520), 520px);aspect-ratio:460/520;margin:0 auto;cursor:pointer}
+.fc-inner{position:relative;width:100%;height:100%;transition:transform .7s cubic-bezier(.4,1.4,.5,1);transform-style:preserve-3d}
+.fc.flipped .fc-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border:6px solid var(--ink);border-radius:30px;overflow:hidden;box-shadow:0 8px 0 var(--ink)}
+.face.front{background:linear-gradient(#bfe9ff 0,#e9f8ff 74%,#c9efb9 74%,#b4e3a2 100%)}
+.face.front svg{position:absolute;inset:0;width:100%;height:100%}
+.face.front .ask{position:absolute;top:10px;left:0;right:0;font-size:clamp(20px,3vw,30px);font-weight:800;z-index:2}
+.face.back{transform:rotateY(180deg);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px}
+.face.back .mini{width:42%;aspect-ratio:460/520;position:relative}
+.face.back .mini svg{width:100%;height:100%}
+.word{font-size:clamp(40px,9vw,84px);font-weight:800;line-height:1}
+.word .art{margin-right:.2em}
+.sub{font-size:clamp(20px,3.6vw,32px);font-weight:700;opacity:.8}
+.c-le{color:var(--le)} .c-la{color:var(--la)} .c-les{color:var(--les)}
+.fc-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:20px;flex-wrap:wrap}
+.counter{font-size:24px;font-weight:800;min-width:80px}
+.round{width:64px;height:64px;border-radius:50%;border:4px solid var(--ink);background:var(--yellow);box-shadow:0 5px 0 var(--ink);font-size:30px;font-weight:800}
+.round:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+
+/* Builder */
+.bubble{position:relative;margin-top:22px;background:#fff;border:5px solid var(--ink);border-radius:24px;padding:10px 18px;
+  font-size:clamp(21px,2.6vw,34px);font-weight:800;min-height:64px;box-shadow:0 6px 0 var(--ink)}
+.bubble::before{content:"";position:absolute;top:-22px;left:50%;margin-left:-16px;border:16px solid transparent;border-bottom:20px solid var(--ink);border-top:0}
+.controls{background:#fff;border:5px solid var(--ink);border-radius:28px;padding:12px 16px;box-shadow:0 8px 0 var(--ink);
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px 20px;max-height:72vh;overflow-y:auto}
+.row{display:flex;flex-direction:column;gap:6px;padding:6px 0;border-bottom:2px dashed #ddd}
+.row .lab{font-size:20px;font-weight:800}
+.opts{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font-size:18px;font-weight:700;padding:4px 14px;border-radius:999px;border:3px solid var(--ink);background:#fff}
+.chip.sel{background:var(--teal)}
+.sw{width:42px;height:42px;border-radius:50%;border:3px solid var(--ink)}
+.sw.sel{outline:4px solid var(--ink);outline-offset:3px}
+.num{display:flex;align-items:center;gap:10px}
+.num button{width:46px;height:46px;border-radius:14px;border:3px solid var(--ink);background:var(--yellow);font-size:28px;font-weight:800;line-height:1}
+.num b{font-size:28px;min-width:40px;text-align:center}
+
+/* Voice */
+.mic-box{display:flex;align-items:center;gap:16px;background:#fff;border:5px solid var(--ink);border-radius:28px;padding:12px 16px;box-shadow:0 8px 0 var(--ink)}
+.mic{flex:none;width:96px;height:96px;border-radius:50%;border:5px solid var(--ink);background:var(--red);font-size:46px;box-shadow:0 6px 0 var(--ink)}
+.mic.on{background:var(--green);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 6px 0 var(--ink),0 0 0 0 rgba(111,211,107,.7)}50%{box-shadow:0 6px 0 var(--ink),0 0 0 18px rgba(111,211,107,0)}}
+.mic-txt{flex:1;min-width:0}
+.mic-title{font-size:clamp(18px,2vw,24px);font-weight:700}
+.heard{font-size:clamp(20px,2.4vw,30px);font-weight:800;color:var(--purple);min-height:1.2em}
+.heard.miss{color:var(--red)}
+
+/* Confetti */
+.confetti{position:fixed;top:-20px;width:14px;height:20px;z-index:50;pointer-events:none;border-radius:3px;animation:fall linear forwards}
+
+.hl{animation:dash 1.2s linear infinite}
+.a-stretch,.a-hop,.a-lift,.a-shake,.a-wiggle,.a-peek{transform-box:fill-box;transform-origin:50% 100%}
+.a-float,.a-twinkle,.a-glow,.a-bounce,.a-breathe{transform-box:fill-box;transform-origin:50% 50%}
+.a-flutter{transform-box:fill-box;transform-origin:50% 0}
+.a-stretch{animation:stretch 2.4s ease-in-out infinite}
+.a-hop{animation:hop 1s ease-in-out infinite}
+.a-lift{animation:lift 1.8s ease-in-out infinite}
+.a-shake{animation:shake .5s linear infinite}
+.a-wiggle{animation:wiggle 1.2s ease-in-out infinite}
+.a-peek{animation:peek 3.4s ease-in-out infinite}
+.a-float{animation:floatUp 2.7s ease-in infinite}
+.a-twinkle{animation:twinkle 1.4s ease-in-out infinite}
+.a-glow{animation:glow 1.4s ease-in-out infinite}
+.a-bounce{animation:bounce .9s ease-in-out infinite}
+.a-breathe{animation:breathe 3s ease-in-out infinite}
+.a-flutter{animation:flutter 1.3s ease-in-out infinite}
+.d1{animation-delay:.9s}.d2{animation-delay:1.8s}
+@keyframes stretch{50%{transform:scaleY(1.07)}}
+@keyframes hop{0%,100%{transform:none}45%{transform:translateY(-60px)}}
+@keyframes lift{0%,100%{transform:none}50%{transform:translateY(-28px)}}
+@keyframes shake{0%,100%{transform:none}25%{transform:translateX(-7px) rotate(-1.5deg)}75%{transform:translateX(7px) rotate(1.5deg)}}
+@keyframes wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes peek{0%,100%{transform:translateY(130px)}35%,78%{transform:none}}
+@keyframes floatUp{0%{transform:translateY(25px);opacity:0}20%{opacity:1}100%{transform:translateY(-75px);opacity:0}}
+@keyframes twinkle{0%,100%{transform:scale(.6)}50%{transform:scale(1.25)}}
+@keyframes glow{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes bounce{0%,100%{transform:none}50%{transform:translateY(-80px)}}
+@keyframes breathe{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.05)}}
+@keyframes flutter{0%,100%{transform:skewX(0)}50%{transform:skewX(7deg)}}
+@media (prefers-reduced-motion:reduce){svg *{animation:none!important}}
+@keyframes dash{to{stroke-dashoffset:-48}}
+@keyframes bob{50%{transform:translateY(-12px) rotate(-2deg)}}
+@keyframes wobble{0%,100%{transform:rotate(-6deg) scale(1)}50%{transform:rotate(6deg) scale(1.08)}}
+@keyframes pop{0%{transform:scale(.6)}55%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px) scale(.9)}to{opacity:1;transform:none}}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@keyframes jiggle{0%,100%{transform:none}30%{transform:scale(1.04,.96)}60%{transform:scale(.97,1.03)}}
+.jiggle{animation:jiggle .35s}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="mmStk" x="-15%" y="-15%" width="130%" height="130%">
+    <feMorphology in="SourceAlpha" operator="dilate" radius="6" result="d"/>
+    <feFlood flood-color="#ffffff"/><feComposite in2="d" operator="in" result="w"/>
+    <feOffset in="w" dy="6" result="o"/><feFlood flood-color="#2d2a32" flood-opacity=".2"/><feComposite in2="o" operator="in" result="sh"/>
+    <feMerge><feMergeNode in="sh"/><feMergeNode in="w"/><feMergeNode in="SourceGraphic"/></feMerge>
+  </filter>
+  <filter id="mmGrey"><feColorMatrix type="saturate" values="0.08"/></filter>
+</defs></svg>
+
+<header class="topbar">
+  <button class="icon-btn" id="homeBtn" title="Accueil" aria-label="Accueil">🏠</button>
+  <h1>Le Monstre <span>Mystère</span></h1>
+  <button class="icon-btn" id="textBtn" title="Afficher / cacher le texte" aria-label="Afficher ou cacher le texte">👁️</button>
+  <button class="icon-btn" id="soundBtn" title="Son" aria-label="Son">🔊</button>
+</header>
+
+<!-- HOME -->
+<main id="home">
+  <div class="hero">
+    <div class="mascot" id="mascot"></div>
+    <p>Le corps, le caractère… et le monstre mystère !</p>
+  </div>
+  <div class="modes">
+    <section class="mode">
+      <span class="step">1</span>
+      <h2>🖐️ Le corps</h2>
+      <p>12 cartes : regarde la partie qui brille, dis le mot, retourne la carte !</p>
+      <button class="btn teal big" data-deck="body">Les cartes ▶</button>
+    </section>
+    <section class="mode">
+      <span class="step">2</span>
+      <h2>😊 Comment est-il ?</h2>
+      <p>12 cartes : grand, fort, gentil, timide… avec le masculin et le féminin.</p>
+      <button class="btn pink big" data-deck="traits">Les cartes ▶</button>
+    </section>
+    <section class="mode">
+      <span class="step">3</span>
+      <h2>🔍 Le Monstre Mystère</h2>
+      <p>Écoute les indices, dessine le monstre, puis ouvre le rideau !</p>
+      <div class="levels">
+        <button class="btn" data-level="1">Niveau 1 <small>⭐ 5 indices</small></button>
+        <button class="btn teal" data-level="2">Niveau 2 <small>⭐⭐ 11 indices</small></button>
+        <button class="btn pink" data-level="3">Niveau 3 <small>⭐⭐⭐ 14 indices</small></button>
+      </div>
+    </section>
+    <section class="mode">
+      <span class="step">4</span>
+      <h2>🎨 Crée ton monstre</h2>
+      <p>Un élève construit un monstre. La classe le décrit !</p>
+      <button class="btn purple big" id="buildStart">C'est parti !</button>
+    </section>
+  </div>
+  <div class="tip">
+    <b>Les cartes :</b> touchez la carte pour la retourner (le mot se lit à voix haute). Flèches ◀ ▶ ou glissez le doigt pour changer de carte. 🔀 mélange les cartes.<br>
+    <b>Le jeu :</b> « Indice suivant » lit une phrase ; les élèves dessinent ; à la fin, ouvrez le rideau et comparez !<br>
+    <b>Astuce :</b> 👁️ cache le texte des indices pour un vrai exercice d'écoute.
+  </div>
+  <div class="warn hidden" id="voiceWarn">🔇 Aucune voix française n'a été trouvée sur cet appareil. Le jeu fonctionne quand même : lisez les mots à voix haute !</div>
+</main>
+
+<!-- FLASHCARDS -->
+<main id="cards" class="hidden">
+  <div class="deck-title" id="deckTitle"></div>
+  <div class="legend" id="legend">
+    <span class="c-le">le ●</span><span class="c-la">la ●</span><span class="c-les">les ●</span>
+  </div>
+  <div class="fc" id="fc">
+    <div class="fc-inner">
+      <div class="face front"><div class="ask" id="ask"></div><div id="fcFront"></div></div>
+      <div class="face back" id="fcBack"></div>
+    </div>
+  </div>
+  <div class="fc-nav">
+    <button class="round" id="prevCard" aria-label="Carte précédente">◀</button>
+    <span class="counter" id="counter"></span>
+    <button class="round" id="nextCard" aria-label="Carte suivante">▶</button>
+    <button class="round" id="shuffleCards" aria-label="Mélanger" style="background:#fff">🔀</button>
+    <button class="round" id="sayCard" aria-label="Écouter" style="background:var(--teal)">🔊</button>
+  </div>
+</main>
+
+<!-- MYSTERY -->
+<main id="mystery" class="game hidden">
+  <div>
+    <div class="stage" id="stage">
+      <div class="mwrap" id="mysteryMonster"></div>
+      <div class="curtain l"></div><div class="curtain r"></div>
+      <div class="qmark"><span>?</span></div>
+      <div class="nameplate" id="nameplate"></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="intro" id="intro"></div>
+    <div class="progress" id="progress"></div>
+    <div class="clues" id="clues"></div>
+    <div class="actions">
+      <button class="btn big" id="nextBtn">Indice suivant ▶</button>
+      <button class="btn white hidden" id="rereadBtn">🔊 Tout relire</button>
+      <button class="btn teal hidden" id="newBtn">🔁 Nouveau monstre</button>
+    </div>
+  </div>
+</main>
+
+<!-- BUILDER -->
+<main id="builder" class="game hidden">
+  <div>
+    <div class="stage open" id="buildStage">
+      <div class="mwrap" id="buildMonster"></div>
+    </div>
+    <div class="bubble" id="bubble">Touche un bouton pour changer ton monstre !</div>
+  </div>
+  <div class="panel">
+    <div class="mic-box">
+      <button class="mic" id="micBtn" aria-label="Parler">🎤</button>
+      <div class="mic-txt">
+        <div class="mic-title" id="micTitle">Touche le micro et dis : « Il a trois yeux bleus ! »</div>
+        <div class="heard" id="heard"></div>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn purple" id="describeBtn">🔊 Décris mon monstre</button>
+      <button class="btn white" id="resetBtn">✨ Nouveau</button>
+      <button class="btn" id="randomBtn">🎲 Au hasard</button>
+      <button class="btn white" id="toggleCtl">🎛️ Boutons</button>
+    </div>
+    <div class="controls hidden" id="controls"></div>
+  </div>
+</main>
+
+<script>
+/* ---------- Data ---------- */
+const COLORS = {
+  vert:  {hex:'#6fd36b', f:['vert','verts','verte','vertes']},
+  bleu:  {hex:'#5ab0f5', f:['bleu','bleus','bleue','bleues']},
+  rouge: {hex:'#ff6b6b', f:['rouge','rouges','rouge','rouges']},
+  jaune: {hex:'#ffd23f', f:['jaune','jaunes','jaune','jaunes']},
+  violet:{hex:'#a77bf3', f:['violet','violets','violette','violettes']},
+  orange:{hex:'#ffa24c', f:['orange','orange','orange','orange']},
+  rose:  {hex:'#ff8fc7', f:['rose','roses','rose','roses']},
+  noir:  {hex:'#3a3540', f:['noir','noirs','noire','noires']}
+};
+const BODY_COLORS = ['vert','bleu','rouge','jaune','violet','orange','rose'];
+const EYE_COLORS  = ['bleu','vert','rouge','jaune','violet','noir'];
+const HAIR_COLORS = ['jaune','rouge','vert','bleu','violet','rose','orange','noir'];
+const NUM = {1:'un',2:'deux',3:'trois',4:'quatre',5:'cinq',6:'six'};
+const NAMES = ['Bobo','Zizou','Pompon','Gribouille','Choupi','Moustik','Biscotte','Patapouf','Frisou','Titou','Glouglou','Pirouette','Zouzou','Croquette','Bidule'];
+const TRAIT_POOL = ['gentil','drôle','fort','méchant','intelligent','timide','paresseux','sportif','courageux','beau'];
+
+const CLUES = {
+  color:    m => `Il est ${COLORS[m.color].f[0]}.`,
+  size:     m => `Il est ${m.size}.`,
+  head:     m => `Il a une tête ${m.head}.`,
+  eyes:     m => m.eyes === 1 ? `Il a un œil ${COLORS[m.eyeColor].f[0]}.` : `Il a ${NUM[m.eyes]} yeux ${COLORS[m.eyeColor].f[1]}.`,
+  nose:     m => `Il a un ${m.nose} nez ${COLORS[m.noseColor].f[0]}.`,
+  mouth:    m => `Il a une ${m.mouth} bouche.`,
+  ears:     m => m.ears === 'non' ? `Il n'a pas d'oreilles.` : `Il a de ${m.ears} oreilles.`,
+  hair:     m => m.hair === 'non' ? `Il n'a pas de cheveux.` : `Il a les cheveux ${m.hair} et ${COLORS[m.hairColor].f[1]}.`,
+  neck:     m => m.neck === 'long' ? `Il a un long cou.` : `Il a un petit cou.`,
+  shoulders:m => `Il a de ${m.shoulders} épaules.`,
+  arms:     m => `Il a ${NUM[m.arms]} bras.`,
+  hands:    m => `Il a de ${m.hands} mains.`,
+  legs:     m => m.legs === 1 ? `Il a une jambe.` : `Il a ${NUM[m.legs]} jambes.`,
+  trait:    m => m.trait ? `Il est ${m.trait}.` : `Il est content.`
+};
+const EMOJI = {color:'🎨',size:'📏',head:'🙂',eyes:'👀',nose:'👃',mouth:'👄',ears:'👂',hair:'💇',neck:'🦒',shoulders:'🧍',arms:'💪',hands:'✋',legs:'🦵',trait:'❤️'};
+const LEVELS = {
+  1:['color','eyes','arms','legs','size'],
+  2:['color','size','head','hair','ears','eyes','nose','mouth','arms','legs','trait'],
+  3:['color','size','head','hair','ears','eyes','nose','mouth','neck','shoulders','arms','hands','legs','trait']
+};
+const FULL = LEVELS[3];
+
+/* Flashcard decks */
+const BODY_CARDS = [
+  {hl:'tete',     art:'la',  w:'tête',     one:''},
+  {hl:'cheveux',  art:'les', w:'cheveux',  one:''},
+  {hl:'yeux',     art:'les', w:'yeux',     one:'un œil'},
+  {hl:'nez',      art:'le',  w:'nez',      one:''},
+  {hl:'bouche',   art:'la',  w:'bouche',   one:''},
+  {hl:'oreilles', art:'les', w:'oreilles', one:'une oreille'},
+  {hl:'cou',      art:'le',  w:'cou',      one:''},
+  {hl:'epaules',  art:'les', w:'épaules',  one:'une épaule'},
+  {hl:'bras',     art:'les', w:'bras',     one:'un bras'},
+  {hl:'mains',    art:'les', w:'mains',    one:'une main'},
+  {hl:'jambes',   art:'les', w:'jambes',   one:'une jambe'},
+  {hl:'pieds',    art:'les', w:'pieds',    one:'un pied'}
+];
+const TRAIT_EMOJI = {grand:'🦒',petit:'🐭',fort:'🏋️',beau:'✨',intelligent:'🧠',gentil:'💝','méchant':'😠','drôle':'🤡',timide:'🙈',courageux:'🦸',sportif:'⚽',paresseux:'😴'};
+const TRAIT_CARDS = [
+  {trait:null,          size:'grand', m:'grand',       f:'grande',       color:'bleu'},
+  {trait:null,          size:'petit', m:'petit',       f:'petite',       color:'jaune'},
+  {trait:'fort',        size:'grand', m:'fort',        f:'forte',        color:'orange'},
+  {trait:'beau',        size:'grand', m:'beau',        f:'belle',        color:'rose'},
+  {trait:'intelligent', size:'grand', m:'intelligent', f:'intelligente', color:'violet'},
+  {trait:'gentil',      size:'grand', m:'gentil',      f:'gentille',     color:'vert'},
+  {trait:'méchant',     size:'grand', m:'méchant',     f:'méchante',     color:'rouge'},
+  {trait:'drôle',       size:'grand', m:'drôle',       f:'drôle',        color:'jaune'},
+  {trait:'timide',      size:'grand', m:'timide',      f:'timide',       color:'bleu'},
+  {trait:'courageux',   size:'grand', m:'courageux',   f:'courageuse',   color:'vert'},
+  {trait:'sportif',     size:'grand', m:'sportif',     f:'sportive',     color:'orange'},
+  {trait:'paresseux',   size:'grand', m:'paresseux',   f:'paresseuse',   color:'violet'}
+];
+
+function baseMonster(){
+  return {name:'Bobo',color:'vert',size:'grand',head:'ronde',eyes:2,eyeColor:'bleu',nose:'petit',noseColor:'rouge',
+          mouth:'grande',ears:'petites',hair:'non',hairColor:'jaune',neck:'petit',shoulders:'larges',arms:2,hands:'petites',legs:2,trait:'gentil'};
+}
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function randomMonster(level){
+  const m = baseMonster();
+  m.name = pick(NAMES);
+  m.color = pick(BODY_COLORS);
+  m.size = pick(['grand','petit']);
+  m.eyes = level === 1 ? pick([1,2,3]) : pick([1,2,3,4,5]);
+  m.eyeColor = pick(EYE_COLORS.filter(c => c !== m.color));
+  m.arms = level === 1 ? pick([2,4]) : pick([2,4,6]);
+  m.legs = pick([1,2,3,4]);
+  m.noseColor = pick(BODY_COLORS.filter(c => c !== m.color));
+  m.hairColor = pick(HAIR_COLORS.filter(c => c !== m.color));
+  if (level >= 2){
+    m.head = pick(['ronde','carrée']);
+    m.nose = pick(['gros','petit']);
+    m.mouth = pick(['grande','petite']);
+    m.ears = pick(['non','petites','grandes']);
+    m.hair = pick(['non','courts','longs']);
+    m.trait = pick(TRAIT_POOL);
+  }
+  if (level >= 3){
+    m.neck = pick(['long','petit']);
+    m.shoulders = pick(['larges','petites']);
+    m.hands = pick(['grandes','petites']);
+  }
+  return m;
+}
+
+/* ---------- Drawing ---------- */
+const OUT = '#2d2a32';
+function shade(hex, amt){
+  const n = parseInt(hex.slice(1),16);
+  const c = v => Math.max(0, Math.min(255, v + amt));
+  const r = c(n>>16), g = c((n>>8)&255), b = c(n&255);
+  return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
+}
+function limb(x1,y1,x2,y2,w,fill){
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${OUT}" stroke-width="${w+9}" stroke-linecap="round"/>`+
+         `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${fill}" stroke-width="${w}" stroke-linecap="round"/>`;
+}
+function flower(x){
+  return `<g><line x1="${x}" y1="505" x2="${x}" y2="455" stroke="#3f9d43" stroke-width="5"/>`+
+    `<ellipse cx="${x-9}" cy="482" rx="9" ry="5" fill="#59c15c"/>`+
+    [0,72,144,216,288].map(a=>`<circle cx="${x+Math.cos(a*Math.PI/180)*9}" cy="${450+Math.sin(a*Math.PI/180)*9}" r="7" fill="#ff8fc7" stroke="${OUT}" stroke-width="2"/>`).join('')+
+    `<circle cx="${x}" cy="450" r="6" fill="#ffd23f" stroke="${OUT}" stroke-width="2"/></g>`;
+}
+function ring(cx, cy, rx, ry){
+  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="${OUT}" stroke-width="15" opacity=".85"/>`+
+         `<ellipse class="hl" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="#ffe14d" stroke-width="9" stroke-dasharray="16 8" stroke-linecap="round"/>`;
+}
+function sparkle(x, y, k){
+  return `<g transform="translate(${x} ${y}) scale(${k})"><path class="a-twinkle" d="M0,-14 Q2,-2 14,0 Q2,2 0,14 Q-2,2 -14,0 Q-2,-2 0,-14Z" fill="#ffe14d" stroke="${OUT}" stroke-width="2"/></g>`;
+}
+function monsterG(m, hl){
+  const col = COLORS[m.color].hex, dark = shade(col,-40), light = shade(col,55);
+  const t = m.trait;
+  const ground = 500, legLen = 85;
+  const bodyBottom = ground - legLen, bodyH = 140, bodyTop = bodyBottom - bodyH;
+  const bw = m.shoulders === 'larges' ? 210 : 130, bx = 200 - bw/2;
+  const neckH = m.neck === 'long' ? 70 : 14;
+  const headR = 62, headCy = bodyTop - neckH - headR + 8;
+  const armMids = [], handPos = [], earPos = [];
+  let s = '';
+
+  // cape (behind everything)
+  if (t === 'courageux'){
+    s += `<path class="a-flutter" d="M${bx+24},${bodyTop+8} L${bx-34},${bodyBottom+50} Q200,${bodyBottom+78} ${bx+bw+34},${bodyBottom+50} L${bx+bw-24},${bodyTop+8} Z" fill="#e0384b" stroke="${OUT}" stroke-width="5" stroke-linejoin="round"/>`;
+  }
+  // legs + feet
+  const legSpan = bw * 0.6;
+  for (let i = 0; i < m.legs; i++){
+    const x = m.legs === 1 ? 200 : 200 - legSpan/2 + legSpan*i/(m.legs-1);
+    s += limb(x, bodyBottom-20, x, ground-14, 22, col);
+    const dir = x < 200 ? -1 : 1;
+    s += `<ellipse cx="${x+dir*10}" cy="${ground-8}" rx="25" ry="11" fill="${dark}" stroke="${OUT}" stroke-width="4"/>`;
+  }
+  // arms + hands
+  const pairs = m.arms/2, handR = m.hands === 'grandes' ? 22 : 11;
+  for (let i = 0; i < pairs; i++){
+    const y = bodyTop + 28 + i*38, up = i % 2 === 0;
+    const dx = (m.lift && i === 0) ? 40 : 66, dy = (m.lift && i === 0) ? -175 : (up ? -48 : 42);
+    [-1,1].forEach(sd => {
+      const x1 = 200 + sd*(bw/2 - 16), x2 = 200 + sd*(bw/2 + dx), y2 = y + dy;
+      s += limb(x1, y, x2, y2, 17, col);
+      armMids.push([(x1+x2)/2 + sd*6, (y+y2)/2]);
+      handPos.push([x2, y2]);
+      if (t === 'fort'){
+        s += `<ellipse cx="${(x1+x2)/2}" cy="${(y+y2)/2-9}" rx="14" ry="11" fill="${col}" stroke="${OUT}" stroke-width="4"/>`;
+      }
+      s += `<circle cx="${x2}" cy="${y2}" r="${handR}" fill="${dark}" stroke="${OUT}" stroke-width="4"/>`;
+      if (m.hands === 'grandes'){
+        [-0.9,0,0.9].forEach(a => {
+          const ang = Math.atan2(y2-y, x2-x1) + a*0.7;
+          s += `<circle cx="${x2+Math.cos(ang)*(handR+4)}" cy="${y2+Math.sin(ang)*(handR+4)}" r="7" fill="${dark}" stroke="${OUT}" stroke-width="3"/>`;
+        });
+      }
+    });
+  }
+  // neck
+  s += `<rect x="182" y="${bodyTop-neckH-12}" width="36" height="${neckH+26}" fill="${col}" stroke="${OUT}" stroke-width="5"/>`;
+  // body + belly
+  s += `<rect x="${bx}" y="${bodyTop}" width="${bw}" height="${bodyH}" rx="${Math.min(58, bw/2.3)}" fill="${col}" stroke="${OUT}" stroke-width="5"/>`;
+  s += `<ellipse cx="200" cy="${bodyTop+bodyH*0.58}" rx="${bw*0.3}" ry="${bodyH*0.3}" fill="${light}" opacity=".75"/>`;
+  if (t === 'courageux'){
+    s += `<path transform="translate(200 ${bodyTop+bodyH*0.56}) scale(1.5)" d="M0,-18 L5,-6 18,-5 8,3 11,16 0,9 -11,16 -8,3 -18,-5 -5,-6Z" fill="#ffe14d" stroke="${OUT}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }
+  if (t === 'beau'){
+    s += `<path d="M200,${bodyTop+6} L176,${bodyTop-6} L176,${bodyTop+18} Z M200,${bodyTop+6} L224,${bodyTop-6} L224,${bodyTop+18} Z" fill="#ff4f8a" stroke="${OUT}" stroke-width="3.5" stroke-linejoin="round"/><circle cx="200" cy="${bodyTop+6}" r="6" fill="#ff4f8a" stroke="${OUT}" stroke-width="3"/>`;
+  }
+  // long hair (behind head)
+  const hc = m.hair !== 'non' ? COLORS[m.hairColor].hex : null;
+  if (m.hair === 'longs'){
+    [-1,1].forEach(sd => {
+      const X = v => 200 + sd*v;
+      s += `<path d="M${X(headR-12)},${headCy-42} Q${X(headR+34)},${headCy+40} ${X(headR+6)},${headCy+108} Q${X(headR-14)},${headCy+96} ${X(headR-26)},${headCy+108} Q${X(headR-6)},${headCy+40} ${X(headR-40)},${headCy-20} Z" fill="${hc}" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>`;
+    });
+  }
+  // ears
+  if (m.ears !== 'non'){
+    const big = m.ears === 'grandes';
+    [-1,1].forEach(sd => {
+      const ex = 200 + sd*(headR + (big ? 8 : 2));
+      earPos.push([ex, headCy-4, big?21:11, big?32:14]);
+      s += `<ellipse cx="${ex}" cy="${headCy-4}" rx="${big?21:11}" ry="${big?32:14}" fill="${col}" stroke="${OUT}" stroke-width="4"/>`;
+      if (big) s += `<ellipse cx="${ex}" cy="${headCy-4}" rx="9" ry="17" fill="${dark}" opacity=".5"/>`;
+    });
+  }
+  // head
+  if (m.head === 'ronde') s += `<circle cx="200" cy="${headCy}" r="${headR}" fill="${col}" stroke="${OUT}" stroke-width="5"/>`;
+  else s += `<rect x="${200-headR}" y="${headCy-headR}" width="${headR*2}" height="${headR*2}" rx="18" fill="${col}" stroke="${OUT}" stroke-width="5"/>`;
+  // hair on top
+  if (m.hair !== 'non'){
+    const top = headCy - headR + 6, w = 100, n = 6;
+    let d = `M${200-w/2},${top+12}`;
+    for (let i = 0; i < n; i++){
+      const x0 = 200 - w/2 + i*w/n;
+      d += ` L${x0 + w/n/2},${top - 26 - (i%2)*9} L${x0 + w/n},${i === n-1 ? top+12 : top+4}`;
+    }
+    d += ' Z';
+    s += `<path d="${d}" fill="${hc}" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>`;
+  }
+  // horns / headband
+  if (t === 'méchant'){
+    s += `<path d="M170,${headCy-46} L156,${headCy-96} L188,${headCy-56} Z M230,${headCy-46} L244,${headCy-96} L212,${headCy-56} Z" fill="#fff3d6" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>`;
+  }
+  if (t === 'sportif'){
+    const hw = m.head === 'ronde' ? 98 : 124;
+    s += `<rect x="${200-hw/2}" y="${headCy-40}" width="${hw}" height="13" rx="4" fill="#ff4f6d" stroke="${OUT}" stroke-width="3"/>`;
+  }
+  // eyes
+  const n = m.eyes, ec = COLORS[m.eyeColor].hex;
+  const er = [0,22,16,14,11.5,10][n], span = [0,0,46,78,90,96][n];
+  const ey = headCy - 12, eyeXs = [];
+  for (let i = 0; i < n; i++){
+    const x = n === 1 ? 200 : 200 - span/2 + span*i/(n-1);
+    const y = ey - (n >= 3 && i % 2 === 1 ? 10 : 0);
+    eyeXs.push([x,y]);
+    if (t === 'paresseux'){
+      s += `<path d="M${x-er},${y} Q${x},${y+er*0.9} ${x+er},${y}" fill="none" stroke="${OUT}" stroke-width="4.5" stroke-linecap="round"/>`;
+      continue;
+    }
+    const down = t === 'timide' ? er*0.32 : 1;
+    s += `<circle cx="${x}" cy="${y}" r="${er}" fill="#fff" stroke="${OUT}" stroke-width="3.5"/>`+
+         `<circle cx="${x}" cy="${y+down}" r="${er*.62}" fill="${ec}"/>`+
+         `<circle cx="${x}" cy="${y+down}" r="${er*.3}" fill="${OUT}"/>`+
+         `<circle cx="${x-er*.25}" cy="${y+down-er*.3}" r="${er*.17}" fill="#fff"/>`;
+  }
+  if (t === 'intelligent' && n === 2){
+    s += eyeXs.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="${er+7}" fill="rgba(255,255,255,.18)" stroke="${OUT}" stroke-width="4.5"/>`).join('')+
+         `<line x1="${eyeXs[0][0]+er+7}" y1="${ey}" x2="${eyeXs[1][0]-er-7}" y2="${ey}" stroke="${OUT}" stroke-width="4.5"/>`;
+  }
+  if (t === 'fort'){
+    s += `<path d="M${200-38},${ey-er-12} L${200-12},${ey-er-5} M${200+38},${ey-er-12} L${200+12},${ey-er-5}" stroke="${OUT}" stroke-width="5" stroke-linecap="round"/>`;
+  }
+  if (t === 'méchant'){
+    s += `<path d="M${200-40},${ey-er-20} L${200-8},${ey-er+2} M${200+40},${ey-er-20} L${200+8},${ey-er+2}" stroke="${OUT}" stroke-width="7" stroke-linecap="round"/>`;
+  }
+  // cheeks
+  if (t === 'gentil' || t === 'timide'){
+    const r = t === 'timide' ? 15 : 10, o = t === 'timide' ? .75 : .55;
+    s += `<circle cx="${200-42}" cy="${headCy+24}" r="${r}" fill="#ff6f9f" opacity="${o}"/><circle cx="${200+42}" cy="${headCy+24}" r="${r}" fill="#ff6f9f" opacity="${o}"/>`;
+  }
+  // nose
+  const nr = m.nose === 'gros' ? 13 : 6;
+  s += `<circle cx="200" cy="${headCy+14}" r="${nr}" fill="${COLORS[m.noseColor].hex}" stroke="${OUT}" stroke-width="3.5"/>`;
+  // mouth
+  const big = m.mouth === 'grande', mw = big ? 58 : 24, my = headCy + 33, depth = big ? 26 : 12;
+  if (t === 'méchant'){
+    s += `<path d="M${200-mw/2},${my+depth*0.9} Q200,${my-depth*0.4} ${200+mw/2},${my+depth*0.9}" fill="none" stroke="${OUT}" stroke-width="6" stroke-linecap="round"/>`;
+  } else if (t === 'timide'){
+    s += `<path d="M188,${my+4} Q194,${my} 200,${my+4} Q206,${my+8} 212,${my+4}" fill="none" stroke="${OUT}" stroke-width="4.5" stroke-linecap="round"/>`;
+  } else if (t === 'paresseux'){
+    s += `<ellipse cx="200" cy="${my+6}" rx="9" ry="7" fill="#7a2e3a" stroke="${OUT}" stroke-width="3.5"/>`;
+  } else {
+    s += `<path d="M${200-mw/2},${my} Q200,${my+depth*2} ${200+mw/2},${my} Z" fill="#7a2e3a" stroke="${OUT}" stroke-width="3.5" stroke-linejoin="round"/>`;
+    if (big) s += `<rect x="186" y="${my}" width="11" height="9" fill="#fff" stroke="${OUT}" stroke-width="2"/><rect x="203" y="${my}" width="11" height="9" fill="#fff" stroke="${OUT}" stroke-width="2"/>`;
+    if (t === 'drôle') s += `<ellipse cx="206" cy="${my+depth+(big?6:4)}" rx="${big?12:7}" ry="${big?13:8}" fill="#ff7aa8" stroke="${OUT}" stroke-width="3"/>`;
+  }
+  // floating extras
+  if (t === 'gentil'){
+    s += `<path transform="translate(${200+headR+26} ${headCy-headR-6}) scale(1.6)" d="M0,6 C0,-2 -12,-2 -12,6 C-12,13 0,19 0,22 C0,19 12,13 12,6 C12,-2 0,-2 0,6Z" fill="#ff4f7a" stroke="${OUT}" stroke-width="2.5"/>`;
+  }
+  if (t === 'intelligent'){
+    const lx = 200 + headR + 30, ly = headCy - headR - 16;
+    s += `<g class="a-glow"><g stroke="${OUT}" stroke-width="3.5" stroke-linecap="round"><line x1="${lx}" y1="${ly-34}" x2="${lx}" y2="${ly-44}"/><line x1="${lx-28}" y1="${ly-18}" x2="${lx-36}" y2="${ly-24}"/><line x1="${lx+28}" y1="${ly-18}" x2="${lx+36}" y2="${ly-24}"/></g>`+
+         `<circle cx="${lx}" cy="${ly-8}" r="20" fill="#fff27a" stroke="${OUT}" stroke-width="3.5"/><rect x="${lx-9}" y="${ly+10}" width="18" height="12" rx="3" fill="#b9b4c4" stroke="${OUT}" stroke-width="3"/></g>`;
+  }
+  if (t === 'paresseux' && !m.noZ){
+    s += `<text x="${200+headR-6}" y="${headCy-headR+4}" font-family="Baloo 2, sans-serif" font-weight="800" fill="${OUT}"><tspan font-size="22">z</tspan><tspan font-size="30" dy="-14">Z</tspan><tspan font-size="40" dy="-18">Z</tspan></text>`;
+  }
+  if (t === 'beau'){
+    s += sparkle(200-headR-34, headCy-headR+4, 1.3) + sparkle(200+headR+32, headCy-20, 1.1) + sparkle(200-headR-20, headCy+50, 0.8) + sparkle(200+headR+12, headCy-headR-22, 0.8);
+  }
+  if (t === 'sportif'){
+    const bxp = bx + bw + 52, byp = ground - 22;
+    s += `<g class="a-bounce"><circle cx="${bxp}" cy="${byp}" r="21" fill="#fff" stroke="${OUT}" stroke-width="4"/><path d="M${bxp},${byp-8} L${bxp+8},${byp-2} L${bxp+5},${byp+8} L${bxp-5},${byp+8} L${bxp-8},${byp-2} Z" fill="${OUT}"/></g>`;
+  }
+
+  // highlight ring for flashcards
+  if (hl){
+    const map = {
+      tete:    () => ring(200, headCy, headR+18, headR+18),
+      cheveux: () => ring(200, headCy-headR-8, 68, 38),
+      yeux:    () => ring(200, ey-4, Math.max(span/2+er+14, 40), er+16),
+      nez:     () => ring(200, headCy+14, nr+14, nr+14),
+      bouche:  () => ring(200, my+depth*0.6, mw/2+16, depth+14),
+      oreilles:() => earPos.map(([x,y,rx,ry]) => ring(x,y,rx+11,ry+11)).join(''),
+      cou:     () => ring(200, bodyTop-neckH/2-6, 36, neckH/2+22),
+      epaules: () => ring(bx+22, bodyTop+14, 28, 26) + ring(bx+bw-22, bodyTop+14, 28, 26),
+      bras:    () => armMids.map(([x,y]) => ring(x,y,40,30)).join(''),
+      mains:   () => handPos.map(([x,y]) => ring(x,y,handR+16,handR+16)).join(''),
+      jambes:  () => ring(200, (bodyBottom-20+ground-14)/2, legSpan/2+32, 44),
+      pieds:   () => ring(200, ground-8, legSpan/2+48, 24)
+    };
+    if (map[hl]) s += map[hl]();
+  }
+
+  return s;
+}
+function renderMonster(m, hl){
+  const sc = m.size === 'grand' ? 1 : 0.62;
+  return `<svg viewBox="-30 0 460 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${m.name}">`+
+    `<ellipse cx="200" cy="503" rx="${150*sc}" ry="11" fill="rgba(45,42,50,.14)"/>`+ flower(408) +
+    `<g transform="translate(200 503) scale(${sc}) translate(-200 -503)"><g filter="url(#mmStk)">${monsterG(m, hl)}</g></g></svg>`;
+}
+
+/* ---------- Trait scenes (Comment est-il ?) ---------- */
+function mk(color, extra){
+  return Object.assign(baseMonster(), {color, eyeColor: color==='bleu'?'vert':'bleu', noseColor: color==='rouge'?'orange':'rouge',
+    hair:'courts', hairColor: color==='jaune'?'rouge':'jaune', ears:'petites', trait:null, shoulders:'petites'}, extra||{});
+}
+function place(m, cx, k, o){
+  o = o || {};
+  const g = o.ground || 480;
+  const look = o.grey ? 'filter="url(#mmGrey)" opacity=".5"' : 'filter="url(#mmStk)"';
+  return `<g transform="translate(${cx-200*k} ${g-500*k}) scale(${k})"><g class="${o.cls||''}" ${look}>${o.before||''}${monsterG(m)}${o.after||''}</g></g>`;
+}
+function cloud(x, y, c){
+  c = c || '#fff';
+  return `<g fill="${c}"><ellipse cx="${x}" cy="${y}" rx="36" ry="19"/><ellipse cx="${x+26}" cy="${y-9}" rx="26" ry="19"/><ellipse cx="${x-24}" cy="${y-4}" rx="20" ry="15"/></g>`;
+}
+function scenery(sky, grass){
+  return `<rect width="460" height="520" fill="${sky}"/>` + cloud(70,62) + cloud(390,96) +
+    `<path d="M0,468 Q115,450 230,468 T460,468 V520 H0Z" fill="${grass}"/>`;
+}
+function heartP(x, y, k, cls){
+  return `<g transform="translate(${x} ${y}) scale(${k})"><path class="${cls||''}" d="M0,6 C0,-2 -12,-2 -12,6 C-12,13 0,19 0,22 C0,19 12,13 12,6 C12,-2 0,-2 0,6Z" fill="#ff4f7a" stroke="${OUT}" stroke-width="2.5"/></g>`;
+}
+function bubbleTxt(x, y, txt, cls, col){
+  return `<g transform="translate(${x} ${y})"><g class="${cls||''}"><text text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="34" fill="${col||OUT}" stroke="#fff" stroke-width="7" paint-order="stroke">${txt}</text></g></g>`;
+}
+const SCENES = {
+  grand(){ return pair('grand'); },
+  petit(){ return pair('petit'); },
+  fort(){
+    const m = mk('orange', {trait:'fort', shoulders:'larges', hair:'non', lift:true});
+    const bar = `<line x1="-6" y1="128" x2="406" y2="128" stroke="#5b5866" stroke-width="13" stroke-linecap="round"/>`+
+      [-6, 406].map(x => `<rect x="${x-20}" y="70" width="40" height="116" rx="12" fill="#3a3540" stroke="${OUT}" stroke-width="4"/>`).join('')+
+      `<text x="200" y="96" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="44" fill="${OUT}" stroke="#fff" stroke-width="8" paint-order="stroke">100 kg</text>`;
+    return scenery('#ffe9c7', '#f6c48a') + place(m, 230, .74, {cls:'a-lift', after:bar});
+  },
+  beau(){
+    const m = mk('rose', {trait:'beau', hair:'longs', hairColor:'jaune'});
+    const mirror = `<line x1="375" y1="380" x2="375" y2="470" stroke="#c99a2e" stroke-width="10"/><ellipse cx="375" cy="470" rx="36" ry="9" fill="#c99a2e"/>`+
+      `<ellipse cx="375" cy="290" rx="56" ry="86" fill="#d7f1ff" stroke="#e8b400" stroke-width="12"/>`+
+      `<path d="M345,240 Q352,222 368,214 M342,262 Q346,252 352,246" stroke="#fff" stroke-width="7" stroke-linecap="round" fill="none"/>`+
+      heartP(380, 288, 1.6, 'a-twinkle');
+    return scenery('#ffe3f1', '#b9e8a8') + mirror + place(m, 165, .82, {cls:'a-wiggle'});
+  },
+  intelligent(){
+    const m = mk('violet', {trait:'intelligent'});
+    const board = `<rect x="40" y="40" width="380" height="190" rx="12" fill="#2f5d50" stroke="#8b5a2b" stroke-width="12"/>`+
+      `<text x="230" y="120" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="54" fill="#fff">2 + 2 = 4</text>`+
+      `<text x="230" y="190" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="700" font-size="42" fill="#ffe14d">A B C</text>`;
+    const book = `<rect x="20" y="228" width="58" height="46" rx="5" fill="#ff6b6b" stroke="${OUT}" stroke-width="4"/><line x1="49" y1="232" x2="49" y2="270" stroke="${OUT}" stroke-width="3"/>`;
+    return scenery('#e9f3ff', '#b9e8a8') + board + place(m, 215, .66, {after:book});
+  },
+  gentil(){
+    const m = mk('vert', {trait:'gentil'});
+    const fl = `<line x1="331" y1="258" x2="350" y2="170" stroke="#3f9d43" stroke-width="7"/>`+
+      [0,72,144,216,288].map(a => `<circle cx="${350+Math.cos(a*Math.PI/180)*16}" cy="${160+Math.sin(a*Math.PI/180)*16}" r="13" fill="#ff8fc7" stroke="${OUT}" stroke-width="3"/>`).join('')+
+      `<circle cx="350" cy="160" r="10" fill="#ffd23f" stroke="${OUT}" stroke-width="3"/>`;
+    const friend = mk('jaune', {hairColor:'rose'});
+    return scenery('#e7f8ea', '#9fdc8c') + place(m, 160, .8, {after:fl}) + place(friend, 380, .42, {cls:'a-hop'}) +
+      heartP(300, 200, 1.6, 'a-float') + heartP(340, 170, 1.2, 'a-float d1') + heartP(270, 150, 1.1, 'a-float d2');
+  },
+  'méchant'(){
+    const m = mk('rouge', {trait:'méchant', hair:'non'});
+    const storm = cloud(230, 62, '#6b6478') + cloud(170, 70, '#7d7690') +
+      `<polygon points="222,80 200,128 220,128 206,168 246,112 224,112 240,80" fill="#ffe14d" stroke="${OUT}" stroke-width="3" class="a-glow"/>`;
+    return `<rect width="460" height="520" fill="#d9d4e6"/><path d="M0,468 Q115,450 230,468 T460,468 V520 H0Z" fill="#a9b59a"/>` +
+      storm + place(m, 220, .8, {cls:'a-shake'}) + bubbleTxt(85, 250, 'GRRR !', 'a-wiggle', '#d62839');
+  },
+  'drôle'(){
+    const m = mk('jaune', {trait:'drôle', hair:'non', nose:'gros', noseColor:'rouge'});
+    const hat = `<polygon points="166,152 234,152 200,62" fill="#8a6cff" stroke="${OUT}" stroke-width="4" stroke-linejoin="round"/>`+
+      `<path d="M181,120 L219,120 M190,95 L210,95" stroke="#ffd23f" stroke-width="7"/><circle cx="200" cy="60" r="11" fill="#ff6b6b" stroke="${OUT}" stroke-width="3"/>`;
+    const friend = mk('bleu', {trait:'drôle', hair:'non'});
+    return scenery('#fff6c9', '#b9e8a8') + place(m, 190, .8, {cls:'a-wiggle', after:hat}) + place(friend, 385, .4, {cls:'a-hop'}) +
+      bubbleTxt(370, 200, 'HA HA !', 'a-float') + bubbleTxt(320, 120, 'HI HI !', 'a-float d1');
+  },
+  timide(){
+    const m = mk('bleu', {trait:'timide'});
+    const bush = [[90,410,72],[185,380,82],[290,388,84],[392,415,68],[230,462,100],[60,470,60],[420,470,60]]
+      .map(([x,y,r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#5cbf5a" stroke="${OUT}" stroke-width="5"/>`).join('') +
+      [[130,400],[250,360],[340,420],[200,450]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="7" fill="#ff8fc7"/>`).join('');
+    return scenery('#e3f4ff', '#9fdc8c') + place(m, 235, .8, {cls:'a-peek'}) + bush + bubbleTxt(370, 190, '…', '', OUT);
+  },
+  courageux(){
+    const m = mk('vert', {trait:'courageux', shoulders:'larges'});
+    const shield = `<circle cx="371" cy="255" r="42" fill="#5ab0f5" stroke="${OUT}" stroke-width="5"/><path transform="translate(371 257) scale(1.5)" d="M0,-18 L5,-6 18,-5 8,3 11,16 0,9 -11,16 -8,3 -18,-5 -5,-6Z" fill="#ffe14d" stroke="${OUT}" stroke-width="2.5"/>`;
+    const sx = 405, sy = 380;
+    const spider = [[-1,-1],[-1,-.3],[-1,.3],[-1,1],[1,-1],[1,-.3],[1,.3],[1,1]].map(([d,a]) =>
+      `<path d="M${sx},${sy} Q${sx+d*60},${sy-50+a*40} ${sx+d*85},${sy+40+a*45}" stroke="${OUT}" stroke-width="8" fill="none" stroke-linecap="round"/>`).join('')+
+      `<ellipse cx="${sx}" cy="${sy}" rx="54" ry="44" fill="#3b2f4a" stroke="${OUT}" stroke-width="4"/>`+
+      `<circle cx="${sx-18}" cy="${sy-8}" r="9" fill="#ff3b3b"/><circle cx="${sx+4}" cy="${sy-12}" r="9" fill="#ff3b3b"/><circle cx="${sx+22}" cy="${sy-4}" r="7" fill="#ff3b3b"/>`;
+    const friend = mk('rose', {trait:'timide'});
+    return scenery('#ffe7d6', '#c9d9a0') + spider + place(friend, 50, .3, {cls:'a-shake'}) + place(m, 205, .7, {after:shield});
+  },
+  sportif(){
+    const m = mk('orange', {trait:'sportif'});
+    const goal = `<g stroke="#fff" stroke-width="7" fill="none"><rect x="368" y="330" width="100" height="140"/></g>`+
+      `<g stroke="#ffffff" stroke-width="2" opacity=".8">` + [0,1,2,3,4].map(i => `<line x1="${368+i*20}" y1="330" x2="${368+i*20}" y2="470"/>`).join('') +
+      [0,1,2,3,4,5].map(i => `<line x1="368" y1="${340+i*24}" x2="460" y2="${340+i*24}"/>`).join('') + `</g>`;
+    const lines = [300,335,370].map(y => `<line x1="20" y1="${y}" x2="70" y2="${y}" stroke="#fff" stroke-width="8" stroke-linecap="round"/>`).join('');
+    return scenery('#dff4ff', '#7fcf6c') + goal + lines + place(m, 175, .8, {cls:'a-hop'});
+  },
+  paresseux(){
+    const m = mk('violet', {trait:'paresseux', arms:0, hair:'non', noZ:true});
+    const bed = `<rect x="22" y="250" width="34" height="210" rx="12" fill="#b07a4a" stroke="${OUT}" stroke-width="4"/>`+
+      `<rect x="30" y="400" width="420" height="44" rx="10" fill="#c98b55" stroke="${OUT}" stroke-width="4"/>`+
+      `<rect x="40" y="440" width="18" height="30" fill="#8b5a2b"/><rect x="420" y="440" width="18" height="30" fill="#8b5a2b"/>`+
+      `<rect x="50" y="372" width="392" height="34" rx="12" fill="#fff" stroke="${OUT}" stroke-width="4"/>`+
+      `<ellipse cx="108" cy="352" rx="56" ry="27" fill="#fff" stroke="${OUT}" stroke-width="4"/>`;
+    const lying = `<g transform="translate(118 322) scale(.72) rotate(-90) translate(-200 -207)"><g filter="url(#mmStk)">${monsterG(m)}</g></g>`;
+    const blanket = `<g class="a-breathe"><rect x="172" y="246" width="262" height="150" rx="34" fill="#7cc0ff" stroke="${OUT}" stroke-width="5"/>`+
+      [[220,290],[290,330],[360,285],[250,365],[395,355]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="10" fill="#fff" opacity=".8"/>`).join('') + `</g>`;
+    return `<rect width="460" height="520" fill="#2c3566"/><circle cx="380" cy="80" r="34" fill="#fff3b0"/><circle cx="366" cy="70" r="30" fill="#2c3566"/>`+
+      [[60,60],[150,110],[250,50],[300,140],[420,170]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#fff"/>`).join('')+
+      `<rect y="470" width="460" height="50" fill="#5a4a7a"/>` + bed + lying + blanket +
+      bubbleTxt(185, 230, 'Z', 'a-float', '#fff') + bubbleTxt(215, 200, 'Z', 'a-float d1', '#fff') + bubbleTxt(245, 170, 'Z', 'a-float d2', '#fff');
+  }
+};
+function pair(t){
+  const big = mk('bleu'), small = mk('jaune');
+  const spot = (x, w) => `<polygon points="${x-22},0 ${x+22},0 ${x+w},478 ${x-w},478" fill="#fff6b0" opacity=".6"/><ellipse cx="${x}" cy="478" rx="${w}" ry="15" fill="#fff6b0"/>`;
+  return scenery('#cfe8ff', '#9fdc8c') + (t === 'grand' ? spot(150, 140) : spot(365, 70)) +
+    place(big, 150, .9, {cls: t === 'grand' ? 'a-stretch' : '', grey: t !== 'grand'}) +
+    place(small, 365, .4, {cls: t === 'petit' ? 'a-hop' : '', grey: t !== 'petit'});
+}
+function sceneSVG(k){
+  return `<svg viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${k}">${SCENES[k]()}</svg>`;
+}
+
+/* ---------- Speech ---------- */
+let soundOn = true, frVoice = null;
+function loadVoices(){
+  try{
+    const v = speechSynthesis.getVoices();
+    frVoice = v.find(x => x.lang === 'fr-FR') || v.find(x => x.lang && x.lang.toLowerCase().replace('_','-').startsWith('fr')) || null;
+  }catch(e){}
+}
+try{ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }catch(e){}
+setTimeout(() => {
+  let has = false;
+  try{ has = 'speechSynthesis' in window && !!frVoice; }catch(e){}
+  if (!has) document.getElementById('voiceWarn').classList.remove('hidden');
+}, 2500);
+function speak(texts, cancel = true){
+  if (!soundOn) return;
+  try{
+    if (cancel) speechSynthesis.cancel();
+    [].concat(texts).forEach(t => {
+      const u = new SpeechSynthesisUtterance(t);
+      u.lang = 'fr-FR'; if (frVoice) u.voice = frVoice; u.rate = 0.82; u.pitch = 1.1;
+      speechSynthesis.speak(u);
+    });
+  }catch(e){}
+}
+
+/* ---------- Navigation ---------- */
+const $ = id => document.getElementById(id);
+function show(id){
+  ['home','cards','mystery','builder'].forEach(s => $(s).classList.toggle('hidden', s !== id));
+  window.scrollTo(0,0);
+}
+$('homeBtn').onclick = () => { try{speechSynthesis.cancel();}catch(e){} show('home'); };
+$('soundBtn').onclick = () => {
+  soundOn = !soundOn; $('soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  $('soundBtn').classList.toggle('off', !soundOn);
+  if (!soundOn) try{speechSynthesis.cancel();}catch(e){}
+};
+$('textBtn').onclick = () => {
+  document.body.classList.toggle('hide-text');
+  $('textBtn').classList.toggle('off', document.body.classList.contains('hide-text'));
+};
+
+$('mascot').innerHTML = renderMonster(Object.assign(baseMonster(), {color:'violet',eyes:3,eyeColor:'jaune',hair:'courts',hairColor:'rose',arms:4,legs:2,nose:'gros',noseColor:'orange',ears:'grandes',trait:'drôle'}));
+
+/* ---------- Flashcards ---------- */
+let deck = [], deckType = 'body', ci = 0;
+const BODY_MON = Object.assign(baseMonster(), {color:'bleu',eyes:2,eyeColor:'vert',hair:'courts',hairColor:'jaune',ears:'grandes',neck:'long',hands:'grandes',nose:'gros',noseColor:'rouge',trait:null});
+function bodyCardSay(c){ return `${c.art} ${c.w}`; }
+function traitCardSay(c){ return `Il est ${c.m}. Elle est ${c.f}.`; }
+function traitMon(c){ return Object.assign(baseMonster(), {color:c.color, size:c.size, trait:c.trait, eyeColor: c.color==='bleu'?'vert':'bleu', noseColor: c.color==='rouge'?'orange':'rouge', hair: c.trait==='beau'?'longs':(c.trait==='méchant'?'non':'courts'), hairColor: c.color==='jaune'?'rouge':'jaune', ears:'petites'}); }
+
+function openDeck(type){
+  deckType = type;
+  deck = (type === 'body' ? BODY_CARDS : TRAIT_CARDS).slice();
+  ci = 0;
+  $('deckTitle').textContent = type === 'body' ? '🖐️ Le corps' : '😊 Comment est-il ?';
+  $('legend').classList.toggle('hidden', type !== 'body');
+  renderCard();
+  show('cards');
+}
+function renderCard(){
+  const c = deck[ci], fc = $('fc');
+  fc.classList.remove('flipped');
+  $('counter').textContent = `${ci+1} / ${deck.length}`;
+  if (deckType === 'body'){
+    $('ask').textContent = "Qu'est-ce que c'est ?";
+    $('fcFront').innerHTML = renderMonster(BODY_MON, c.hl);
+    setTimeout(() => {
+      $('fcBack').innerHTML = `<div class="mini">${renderMonster(BODY_MON, c.hl)}</div>`+
+        `<div class="word c-${c.art}"><span class="art">${c.art}</span>${c.w}</div>`+
+        (c.one ? `<div class="sub">(${c.one})</div>` : '');
+    }, fc.dataset.wasFlipped === '1' ? 350 : 0);
+  } else {
+    const svg = sceneSVG(c.m);
+    $('ask').textContent = 'Comment est-il ?';
+    $('fcFront').innerHTML = svg;
+    setTimeout(() => {
+      $('fcBack').innerHTML = `<div class="mini">${svg}</div>`+
+        `<div class="word">${TRAIT_EMOJI[c.m]} ${c.m === c.f ? c.m : `<span class="c-le">${c.m}</span> · <span class="c-la">${c.f}</span>`}</div>`+
+        `<div class="sub">Il est <span class="c-le">${c.m}</span>. Elle est <span class="c-la">${c.f}</span>.</div>`;
+    }, fc.dataset.wasFlipped === '1' ? 350 : 0);
+  }
+  fc.dataset.wasFlipped = '0';
+}
+function flipCard(){
+  const fc = $('fc');
+  fc.classList.toggle('flipped');
+  const on = fc.classList.contains('flipped');
+  fc.dataset.wasFlipped = on ? '1' : '0';
+  if (on) sayCard();
+}
+function sayCard(){
+  const c = deck[ci];
+  speak(deckType === 'body' ? bodyCardSay(c) : traitCardSay(c));
+}
+function moveCard(d){
+  const wasFlipped = $('fc').classList.contains('flipped');
+  $('fc').dataset.wasFlipped = wasFlipped ? '1' : '0';
+  ci = (ci + d + deck.length) % deck.length;
+  renderCard();
+}
+$('fc').onclick = flipCard;
+$('prevCard').onclick = () => moveCard(-1);
+$('nextCard').onclick = () => moveCard(1);
+$('sayCard').onclick = sayCard;
+$('shuffleCards').onclick = () => {
+  for (let i = deck.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+  ci = 0; renderCard();
+};
+document.querySelectorAll('[data-deck]').forEach(b => b.onclick = () => openDeck(b.dataset.deck));
+let tx = null;
+$('fc').addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+$('fc').addEventListener('touchend', e => {
+  if (tx === null) return;
+  const dx = e.changedTouches[0].clientX - tx; tx = null;
+  if (Math.abs(dx) > 60){ e.preventDefault(); moveCard(dx < 0 ? 1 : -1); }
+});
+document.addEventListener('keydown', e => {
+  if ($('cards').classList.contains('hidden')) return;
+  if (e.key === 'ArrowRight') moveCard(1);
+  else if (e.key === 'ArrowLeft') moveCard(-1);
+  else if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); flipCard(); }
+});
+
+/* ---------- Mystery mode ---------- */
+let level = 1, mon = null, step = 0, keys = [], swapToken = 0;
+document.querySelectorAll('[data-level]').forEach(b => b.onclick = () => startMystery(+b.dataset.level));
+
+function startMystery(lv){
+  level = lv; mon = randomMonster(lv); keys = LEVELS[lv]; step = 0;
+  const stage = $('stage'), wasOpen = stage.classList.contains('open');
+  const token = ++swapToken, newSvg = renderMonster(mon);
+  stage.classList.remove('open');
+  if (wasOpen){
+    setTimeout(() => { if (token === swapToken) $('mysteryMonster').innerHTML = newSvg; }, 1400);
+  } else {
+    $('mysteryMonster').innerHTML = newSvg;
+  }
+  $('nameplate').textContent = '';
+  $('intro').innerHTML = `Le monstre mystère s'appelle ${mon.name}. <small>Écoute bien et dessine-le !</small>`;
+  $('clues').innerHTML = '';
+  $('progress').innerHTML = keys.map(() => '<i></i>').join('');
+  $('nextBtn').textContent = 'Indice suivant ▶';
+  $('nextBtn').classList.remove('hidden','pink');
+  $('rereadBtn').classList.add('hidden');
+  $('newBtn').classList.add('hidden');
+  show('mystery');
+  speak(`Le monstre mystère s'appelle ${mon.name}. Écoute bien et dessine-le !`);
+}
+
+function addClue(text, emoji, num){
+  const div = document.createElement('div');
+  div.className = 'clue';
+  div.innerHTML = `<span class="n">${num}</span><span class="e">${emoji}</span><span class="t"></span><button class="say" aria-label="Écouter">🔊</button>`;
+  div.querySelector('.t').textContent = text;
+  div.querySelector('.t').onclick = e => e.currentTarget.classList.toggle('shown');
+  div.querySelector('.say').onclick = () => speak(text);
+  $('clues').appendChild(div);
+  $('clues').scrollTop = $('clues').scrollHeight;
+}
+
+$('nextBtn').onclick = () => {
+  if (step < keys.length){
+    const k = keys[step], text = CLUES[k](mon);
+    addClue(text, EMOJI[k], step + 1);
+    $('progress').children[step].classList.add('on');
+    speak(text);
+    step++;
+    if (step === keys.length){
+      $('nextBtn').textContent = '🎭 Ouvre le rideau !';
+      $('nextBtn').classList.add('pink');
+      $('rereadBtn').classList.remove('hidden');
+    }
+  } else {
+    $('mysteryMonster').innerHTML = renderMonster(mon);
+    $('nameplate').textContent = `Voici ${mon.name} !`;
+    $('stage').classList.add('open');
+    $('nextBtn').classList.add('hidden');
+    $('newBtn').classList.remove('hidden');
+    setTimeout(() => { confetti(); speak(`Voici ${mon.name} ! Bravo !`); }, 1200);
+  }
+};
+$('rereadBtn').onclick = () => speak(keys.slice(0, step).map(k => CLUES[k](mon)));
+$('newBtn').onclick = () => startMystery(level);
+
+function confetti(){
+  const cols = ['#ff6b6b','#ffd23f','#3ecfc3','#8a6cff','#ff8fc7','#6fd36b'];
+  for (let i = 0; i < 80; i++){
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.background = pick(cols);
+    c.style.animationDuration = (2 + Math.random()*2) + 's';
+    c.style.animationDelay = (Math.random()*0.6) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 5000);
+  }
+}
+
+/* ---------- Builder mode ---------- */
+let bm = baseMonster();
+const BUILD = [
+  {k:'color',     clue:'color',  label:'🎨 La couleur',            type:'color', opts:BODY_COLORS},
+  {k:'size',      clue:'size',   label:'📏 La taille',             opts:[['grand','grand'],['petit','petit']]},
+  {k:'trait',     clue:'trait',  label:'❤️ Il est…',               opts:TRAIT_POOL.map(t => [t,t])},
+  {k:'head',      clue:'head',   label:'🙂 La tête',               opts:[['ronde','ronde'],['carrée','carrée']]},
+  {k:'hair',      clue:'hair',   label:'💇 Les cheveux',           opts:[['non','pas de cheveux'],['courts','courts'],['longs','longs']]},
+  {k:'hairColor', clue:'hair',   label:'💇 La couleur des cheveux', type:'color', opts:HAIR_COLORS},
+  {k:'ears',      clue:'ears',   label:'👂 Les oreilles',          opts:[['non','pas d\'oreilles'],['petites','petites'],['grandes','grandes']]},
+  {k:'eyes',      clue:'eyes',   label:'👀 Les yeux',              type:'num', min:1, max:5, step:1},
+  {k:'eyeColor',  clue:'eyes',   label:'👀 La couleur des yeux',   type:'color', opts:EYE_COLORS},
+  {k:'nose',      clue:'nose',   label:'👃 Le nez',                opts:[['gros','gros'],['petit','petit']]},
+  {k:'noseColor', clue:'nose',   label:'👃 La couleur du nez',     type:'color', opts:BODY_COLORS},
+  {k:'mouth',     clue:'mouth',  label:'👄 La bouche',             opts:[['grande','grande'],['petite','petite']]},
+  {k:'neck',      clue:'neck',   label:'🦒 Le cou',                opts:[['petit','petit'],['long','long']]},
+  {k:'shoulders', clue:'shoulders',label:'🧍 Les épaules',         opts:[['larges','larges'],['petites','petites']]},
+  {k:'arms',      clue:'arms',   label:'💪 Les bras',              type:'num', min:2, max:6, step:2},
+  {k:'hands',     clue:'hands',  label:'✋ Les mains',             opts:[['petites','petites'],['grandes','grandes']]},
+  {k:'legs',      clue:'legs',   label:'🦵 Les jambes',            type:'num', min:1, max:4, step:1}
+];
+
+function drawBuilder(jig){
+  $('buildMonster').innerHTML = renderMonster(bm);
+  if (jig){ const w = $('buildMonster'); w.classList.remove('jiggle'); void w.offsetWidth; w.classList.add('jiggle'); }
+  const box = $('controls'); box.innerHTML = '';
+  BUILD.forEach(row => {
+    if (row.k === 'hairColor' && bm.hair === 'non') return;
+    const r = document.createElement('div'); r.className = 'row';
+    r.innerHTML = `<div class="lab">${row.label}</div>`;
+    const o = document.createElement('div'); o.className = 'opts';
+    if (row.type === 'color'){
+      row.opts.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'sw' + (bm[row.k] === c ? ' sel' : '');
+        b.style.background = COLORS[c].hex; b.title = c; b.setAttribute('aria-label', c);
+        b.onclick = () => change(row, c);
+        o.appendChild(b);
+      });
+    } else if (row.type === 'num'){
+      const d = document.createElement('div'); d.className = 'num';
+      const minus = document.createElement('button'); minus.textContent = '−';
+      const plus = document.createElement('button'); plus.textContent = '+';
+      const v = document.createElement('b'); v.textContent = bm[row.k];
+      minus.onclick = () => { if (bm[row.k] - row.step >= row.min) change(row, bm[row.k] - row.step); };
+      plus.onclick  = () => { if (bm[row.k] + row.step <= row.max) change(row, bm[row.k] + row.step); };
+      d.append(minus, v, plus); o.appendChild(d);
+    } else {
+      row.opts.forEach(([val, lab]) => {
+        const b = document.createElement('button');
+        b.className = 'chip' + (bm[row.k] === val ? ' sel' : '');
+        b.textContent = lab;
+        b.onclick = () => change(row, val);
+        o.appendChild(b);
+      });
+    }
+    r.appendChild(o); box.appendChild(r);
+  });
+}
+function change(row, val){
+  const keepScroll = $('controls').scrollTop;
+  bm[row.k] = val;
+  if (row.k === 'color' && bm.noseColor === val) bm.noseColor = pick(BODY_COLORS.filter(c => c !== val));
+  const text = CLUES[row.clue](bm);
+  $('bubble').textContent = text;
+  speak(text);
+  drawBuilder(true);
+  $('controls').scrollTop = keepScroll;
+}
+$('buildStart').onclick = () => { bm = Object.assign(baseMonster(), {trait:null}); drawBuilder(false); $('bubble').textContent = 'Décris ton monstre au micro !'; $('heard').textContent = ''; show('builder'); };
+$('describeBtn').onclick = () => {
+  const lines = FULL.map(k => CLUES[k](bm));
+  $('bubble').textContent = lines.slice(0,4).join(' ') + ' …';
+  speak(['Voici mon monstre.'].concat(lines));
+};
+$('randomBtn').onclick = () => {
+  bm = randomMonster(3);
+  drawBuilder(true);
+  const t = `${CLUES.color(bm)} ${CLUES.trait(bm)} ${CLUES.eyes(bm)}`;
+  $('bubble').textContent = t; speak(t);
+};
+
+/* ---------- Voice: speak and the monster changes ---------- */
+const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/œ/g,'oe').replace(/[’']/g,' ');
+const NUMW = {un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,'1':1,'2':2,'3':3,'4':4,'5':5,'6':6};
+const COLW = [['vert','vert'],['bleu','bleu'],['rouge','rouge'],['jaune','jaune'],['violet','violet'],['orange','orange'],['rose','rose'],['noir','noir']];
+const TRAITW = [['gentil','gentil'],['drole','drôle'],['fort','fort'],['mechant','méchant'],['intelligent','intelligent'],['timide','timide'],['paresseu','paresseux'],['sportif','sportif'],['sportive','sportif'],['courageu','courageux'],['beau','beau'],['belle','beau']];
+function findNum(c){ for (const w of c.split(/\s+/)) if (NUMW[w]) return NUMW[w]; return null; }
+function findCol(c){ for (const [k,v] of COLW) if (new RegExp('\\b'+k).test(c)) return v; return null; }
+function has(c, re){ return re.test(c); }
+function parseSpeech(text, m){
+  const changed = [];
+  const clauses = norm(text).split(/,|\bet\b|\bil\b|\belle\b|\bavec\b|\./).map(s => s.trim()).filter(Boolean);
+  let last = null;
+  for (const c of clauses){
+    const n0 = findNum(c), col0 = findCol(c);
+    // "les cheveux longs et roses": a colour on its own continues the previous body part
+    const partRe = /yeux|oeil|\bbras\b|jambe|cheveu|\bnez\b|bouche|oreille|\bcou\b|epaule|\bmains?\b|\btete\b/;
+    if (!partRe.test(c) && !/\best\b/.test(c) && last && col0){
+      if (last === 'hair') m.hairColor = col0; else if (last === 'eyes') m.eyeColor = col0; else if (last === 'nose') m.noseColor = col0; else last = null;
+      if (last){ changed.push(last); continue; }
+    }
+    const n = n0, col = col0, big = has(c,/\b(grand|grande|grandes|gros|grosse|large|larges)\b/), small = has(c,/\b(petit|petite|petites|petits)\b/), no = has(c,/\bpas\b|\bsans\b/);
+    if (has(c,/yeux|oeil/)){ if (n) m.eyes = Math.min(5,n); if (col) m.eyeColor = col; changed.push('eyes'); last = 'eyes'; }
+    else if (has(c,/\bbras\b/)){ if (n) m.arms = Math.max(2, Math.min(6, n % 2 ? n+1 : n)); changed.push('arms'); last = 'arms'; }
+    else if (has(c,/jambe/)){ if (n) m.legs = Math.min(4,n); changed.push('legs'); last = 'legs'; }
+    else if (has(c,/cheveu/)){ m.hair = no ? 'non' : has(c,/long/) ? 'longs' : 'courts'; if (col) m.hairColor = col; changed.push('hair'); last = 'hair'; }
+    else if (has(c,/\bnez\b/)){ if (big) m.nose = 'gros'; if (small) m.nose = 'petit'; if (col) m.noseColor = col; changed.push('nose'); last = 'nose'; }
+    else if (has(c,/bouche/)){ if (big) m.mouth = 'grande'; if (small) m.mouth = 'petite'; changed.push('mouth'); last = 'mouth'; }
+    else if (has(c,/oreille/)){ m.ears = no ? 'non' : small ? 'petites' : 'grandes'; changed.push('ears'); last = 'ears'; }
+    else if (has(c,/\bcou\b/)){ m.neck = has(c,/long/) ? 'long' : 'petit'; changed.push('neck'); last = 'neck'; }
+    else if (has(c,/epaule/)){ m.shoulders = small ? 'petites' : 'larges'; changed.push('shoulders'); last = 'shoulders'; }
+    else if (has(c,/\bmains?\b/)){ m.hands = small ? 'petites' : 'grandes'; changed.push('hands'); last = 'hands'; }
+    else if (has(c,/\btete\b/)){ if (has(c,/carre/)) m.head = 'carrée'; else if (has(c,/rond/)) m.head = 'ronde'; changed.push('head'); last = 'head'; }
+    else {
+      last = null;
+      if (col){ m.color = col === 'noir' ? 'violet' : col; if (m.noseColor === m.color) m.noseColor = pick(BODY_COLORS.filter(x => x !== m.color)); changed.push('color'); }
+      if (big && !has(c,/gros/)){ m.size = 'grand'; changed.push('size'); }
+      else if (small){ m.size = 'petit'; changed.push('size'); }
+      for (const [k,v] of TRAITW) if (new RegExp('\\b'+k).test(c)){ m.trait = v; changed.push('trait'); break; }
+    }
+  }
+  return [...new Set(changed)];
+}
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null, listening = false;
+function setMic(on){
+  listening = on; $('micBtn').classList.toggle('on', on);
+  $('micTitle').textContent = on ? 'J\'écoute… Parle en français !' : 'Touche le micro et dis : « Il a trois yeux bleus ! »';
+}
+function handleHeard(text){
+  const changed = parseSpeech(text, bm);
+  $('heard').classList.toggle('miss', !changed.length);
+  $('heard').textContent = changed.length ? '« ' + text + ' »' : '« ' + text + ' » 🤔 Je n\'ai pas compris…';
+  if (changed.length){
+    $('bubble').textContent = changed.map(k => CLUES[k](bm)).join(' ');
+    drawBuilder(true);
+  }
+}
+function startRec(){
+  if (!SR){
+    $('heard').classList.add('miss');
+    $('heard').textContent = 'Le micro ne marche pas dans ce navigateur. Ouvrez le fichier dans Google Chrome (Android ou ordinateur) ou Safari (iPhone).';
+    return;
+  }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  rec = new SR();
+  rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
+  rec.onresult = e => {
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const r = e.results[i], t = r[0].transcript.trim();
+      if (r.isFinal) handleHeard(t);
+      else { $('heard').classList.remove('miss'); $('heard').textContent = '… ' + t; }
+    }
+  };
+  rec.onerror = e => {
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+      listening = false; setMic(false);
+      $('heard').classList.add('miss');
+      $('heard').textContent = 'Le micro est bloqué. Autorisez le micro, et ouvrez le jeu depuis le fichier (pas depuis le lien Claude).';
+    }
+  };
+  rec.onend = () => { if (listening){ try{ rec.start(); }catch(e){ setMic(false); } } };
+  try{ rec.start(); setMic(true); }catch(e){ setMic(false); }
+}
+function stopRec(){ listening = false; setMic(false); try{ rec && rec.stop(); }catch(e){} }
+$('micBtn').onclick = () => listening ? stopRec() : startRec();
+$('toggleCtl').onclick = () => $('controls').classList.toggle('hidden');
+$('resetBtn').onclick = () => {
+  bm = Object.assign(baseMonster(), {trait:null, ears:'petites'});
+  drawBuilder(true); $('bubble').textContent = 'Un nouveau monstre ! Décris-le !';
+};
+$('homeBtn').addEventListener('click', stopRec);
+</script>
+</body>
+</html>
