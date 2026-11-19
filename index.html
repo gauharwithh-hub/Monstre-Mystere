@@ -63,6 +63,7 @@ button{font-family:inherit;color:var(--ink);cursor:pointer}
 /* Game layout */
 .game{display:grid;grid-template-columns:minmax(280px,44%) 1fr;gap:22px;padding:4px 16px 24px;max-width:1500px;margin:0 auto;align-items:start}
 @media (max-width:760px){.game{grid-template-columns:1fr}}
+@media (max-width:760px){#buildStage{width:min(100%, calc(40vh * 460 / 520))}#builder .bubble{margin-top:16px}}
 
 .stage{position:relative;border:6px solid var(--ink);border-radius:30px;overflow:hidden;aspect-ratio:460/520;
   width:min(100%, calc(76vh * 460 / 520));margin:0 auto;
@@ -150,6 +151,9 @@ button{font-family:inherit;color:var(--ink);cursor:pointer}
 .mic-title{font-size:clamp(18px,2vw,24px);font-weight:700}
 .heard{font-size:clamp(20px,2.4vw,30px);font-weight:800;color:var(--purple);min-height:1.2em}
 .heard.miss{color:var(--red)}
+.dbg{font-size:14px;opacity:.6;font-weight:600}
+.type-box{display:flex;gap:10px}
+.type-box input{flex:1;min-width:0;font:700 clamp(18px,2.2vw,26px) 'Baloo 2',sans-serif;padding:10px 16px;border:4px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink)}
 
 /* Confetti */
 .confetti{position:fixed;top:-20px;width:14px;height:20px;z-index:50;pointer-events:none;border-radius:3px;animation:fall linear forwards}
@@ -313,8 +317,13 @@ button{font-family:inherit;color:var(--ink);cursor:pointer}
       <div class="mic-txt">
         <div class="mic-title" id="micTitle">Touche le micro et dis : « Il a trois yeux bleus ! »</div>
         <div class="heard" id="heard"></div>
+        <div class="dbg" id="micDbg"></div>
       </div>
     </div>
+    <form class="type-box" id="typeForm">
+      <input id="typeIn" type="text" lang="fr" autocomplete="off" placeholder="⌨️ Écris ou dicte avec le clavier 🎙️ : Il a trois yeux…">
+      <button class="btn teal" type="submit">OK</button>
+    </form>
     <div class="actions">
       <button class="btn purple" id="describeBtn">🔊 Décris mon monstre</button>
       <button class="btn white" id="resetBtn">✨ Nouveau</button>
@@ -1120,12 +1129,20 @@ function handleHeard(text){
 function startRec(){
   if (!SR){
     $('heard').classList.add('miss');
-    $('heard').textContent = 'Le micro ne marche pas dans ce navigateur. Ouvrez le fichier dans Google Chrome (Android ou ordinateur) ou Safari (iPhone).';
+    $('heard').textContent = 'Le micro ne marche pas dans ce navigateur. Utilisez Chrome (Android) ou Safari (iPhone) — ou la dictée du clavier ci-dessous ⌨️🎙️.';
     return;
   }
   try{ speechSynthesis.cancel(); }catch(e){}
+  listening = true; setMic(true);
+  runRec();
+}
+function runRec(){
+  if (!listening) return;
+  try{ rec && (rec.onend = null); }catch(e){}
   rec = new SR();
-  rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = true; rec.maxAlternatives = 1;
+  rec.lang = 'fr-FR'; rec.interimResults = true; rec.continuous = false; rec.maxAlternatives = 1;
+  rec.onaudiostart = () => { $('micDbg').textContent = '🎙️ micro ouvert'; };
+  rec.onspeechstart = () => { $('micDbg').textContent = '👂 j\'entends quelqu\'un…'; };
   rec.onresult = e => {
     for (let i = e.resultIndex; i < e.results.length; i++){
       const r = e.results[i], t = r[0].transcript.trim();
@@ -1134,17 +1151,29 @@ function startRec(){
     }
   };
   rec.onerror = e => {
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed'){
-      listening = false; setMic(false);
-      $('heard').classList.add('miss');
-      $('heard').textContent = 'Le micro est bloqué. Autorisez le micro, et ouvrez le jeu depuis le fichier (pas depuis le lien Claude).';
+    const msg = {
+      'not-allowed':'Le micro est bloqué : autorisez le micro pour ce site dans le navigateur.',
+      'service-not-allowed':'La reconnaissance vocale est désactivée sur ce téléphone (iPhone : activez Siri et la Dictée dans Réglages).',
+      'audio-capture':'Aucun micro disponible (une autre app l\'utilise peut-être).',
+      'network':'Pas de connexion : la reconnaissance vocale a besoin d\'internet.',
+      'language-not-supported':'Le français n\'est pas disponible pour la reconnaissance vocale sur ce téléphone.'
+    }[e.error];
+    $('micDbg').textContent = 'code : ' + e.error;
+    if (msg){
+      $('heard').classList.add('miss'); $('heard').textContent = msg + ' Essayez la dictée du clavier ci-dessous ⌨️🎙️.';
+      if (e.error !== 'network'){ listening = false; setMic(false); }
     }
   };
-  rec.onend = () => { if (listening){ try{ rec.start(); }catch(e){ setMic(false); } } };
-  try{ rec.start(); setMic(true); }catch(e){ setMic(false); }
+  rec.onend = () => { if (listening) setTimeout(runRec, 250); };
+  try{ rec.start(); }catch(e){ $('micDbg').textContent = 'start : ' + e.message; setTimeout(runRec, 600); }
 }
 function stopRec(){ listening = false; setMic(false); try{ rec && rec.stop(); }catch(e){} }
 $('micBtn').onclick = () => listening ? stopRec() : startRec();
+$('typeForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = $('typeIn').value.trim();
+  if (t){ handleHeard(t); $('typeIn').value = ''; }
+});
 $('toggleCtl').onclick = () => $('controls').classList.toggle('hidden');
 $('resetBtn').onclick = () => {
   bm = Object.assign(baseMonster(), {trait:null, ears:'petites'});
